@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile Python sources
+        run: python -m py_compile server.py utils.py reindex.py chunking.py
+
+      - name: Build package
+        run: uv build
+
+      - name: Validate public docs
+        run: |
+          set -euo pipefail
+          test -f README.md
+          test -f docs/index.html
+          test -f docs/assets/favicon.svg
+          test -f docs/assets/social-preview.svg
+          test -f docs/mcp_search.png
+          grep -q "Public Surface" README.md
+          grep -q "Security & Privacy" README.md
+          grep -q "og:image" docs/index.html
+          grep -q "twitter:image" docs/index.html

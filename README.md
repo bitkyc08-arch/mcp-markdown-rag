@@ -2,6 +2,8 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/markdown-fastrag-mcp.svg)](https://pypi.org/project/markdown-fastrag-mcp/)
 [![PyPI downloads](https://img.shields.io/pypi/dm/markdown-fastrag-mcp.svg)](https://pypi.org/project/markdown-fastrag-mcp/)
+[![CI](https://github.com/lidge-jun/markdown-fastrag-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/lidge-jun/markdown-fastrag-mcp/actions/workflows/ci.yml)
+[![Pages](https://github.com/lidge-jun/markdown-fastrag-mcp/actions/workflows/pages.yml/badge.svg)](https://github.com/lidge-jun/markdown-fastrag-mcp/actions/workflows/pages.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-green)](LICENSE)
 [![MCP Server](https://img.shields.io/badge/MCP-Server-blue)](https://modelcontextprotocol.io)
 [![Python](https://img.shields.io/badge/Python-%3E%3D3.10-blue.svg)](https://python.org/)
@@ -11,6 +13,19 @@ A semantic search engine for markdown documents. An MCP server with **non-blocki
 > This project is a fork of [Zackriya-Solutions/MCP-Markdown-RAG](https://github.com/Zackriya-Solutions/MCP-Markdown-RAG), heavily extended for production multi-agent use. Original project is licensed under Apache 2.0.
 
 > Ask *"what are the tradeoffs of microservices?"* and find your notes about service boundaries, distributed systems, and API design — even if none of them mention "microservices."
+
+## Public Surface
+
+| Area | Current status |
+| --- | --- |
+| Package | `markdown-fastrag-mcp` 1.7.1 on PyPI |
+| Runtime | Python >=3.10 MCP server |
+| Storage | Milvus Lite by default; Milvus Standalone or Zilliz Cloud through `MILVUS_ADDRESS` |
+| Embeddings | local, Gemini, OpenAI, OpenAI-compatible, Vertex AI, Voyage |
+| License | Apache-2.0, inherited from the upstream fork lineage |
+| GitHub Pages | Prepared from `/docs` after an authorized push |
+| Release CI | Existing PyPI release workflow has successful historical runs |
+| Local verification | `python3 -m py_compile server.py utils.py reindex.py chunking.py` |
 
 ```mermaid
 graph LR
@@ -46,6 +61,15 @@ Add to your MCP host config:
 ```
 
 > **Tip**: Omit `MILVUS_ADDRESS` for local-only use (defaults to SQLite-based Milvus Lite).
+
+## Verification
+
+```bash
+python3 -m py_compile server.py utils.py reindex.py chunking.py
+python3 -m build
+```
+
+The release workflow builds with `uv build` and publishes through PyPI trusted publishing on GitHub releases. The prepared CI workflow also validates package metadata, docs assets, and core Python syntax before future pushes.
 
 ## Features
 
@@ -131,6 +155,14 @@ flowchart LR
 > **Tip**: Defaults work well for most vaults. Adjust `MIN_CHUNK_TOKENS` / `MIN_FINAL_TOKENS` if short notes are being dropped unexpectedly. Changes require a force reindex (`reindex.py --force`).
 >
 > See [Embedding Providers](docs/embedding-providers.md) for full auth and tuning options.
+
+## Security & Privacy
+
+- API keys are read from environment variables; never commit provider keys or host MCP configs with literal secrets.
+- `MARKDOWN_WORKSPACE` can lock indexing and search to an approved root.
+- `scope_path` should be used when exposing search to multiple agents so one project cannot silently query another project's notes.
+- Generated vector stores and tracking databases can reveal file paths and note topics; treat `.db/` and Milvus exports as private data.
+- `clear_index` is destructive and should be reserved for explicit maintenance, not routine search.
 
 ## Performance
 

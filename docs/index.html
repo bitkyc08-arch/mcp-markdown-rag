@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Markdown FastRAG MCP - Semantic Search for Markdown Workspaces</title>
+    <meta
+      name="description"
+      content="Markdown FastRAG MCP is a Python MCP server for semantic markdown search with background indexing, multi-provider embeddings, and Milvus storage."
+    />
+    <link rel="canonical" href="https://lidge-jun.github.io/markdown-fastrag-mcp/" />
+    <meta property="og:title" content="Markdown FastRAG MCP" />
+    <meta
+      property="og:description"
+      content="Semantic markdown search for multi-agent workspaces, backed by Milvus and multiple embedding providers."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://lidge-jun.github.io/markdown-fastrag-mcp/" />
+    <meta property="og:image" content="https://lidge-jun.github.io/markdown-fastrag-mcp/assets/social-preview.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Markdown FastRAG MCP" />
+    <meta
+      name="twitter:description"
+      content="A Python MCP server for semantic markdown search with background indexing and Milvus."
+    />
+    <meta name="twitter:image" content="https://lidge-jun.github.io/markdown-fastrag-mcp/assets/social-preview.svg" />
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+    <style>
+      :root {
+        color: #111827;
+        background: #f8fafc;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .shell {
+        width: min(1120px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 22px 0;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 850;
+        text-decoration: none;
+      }
+
+      .mark {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        border-radius: 10px;
+        background: #111827;
+        color: #fff;
+        font-size: 12px;
+      }
+
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 16px;
+        color: #475569;
+        font-size: 14px;
+        font-weight: 750;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
+        gap: 40px;
+        align-items: center;
+        min-height: calc(100vh - 86px);
+        padding: 34px 0 72px;
+      }
+
+      .eyebrow {
+        color: #2563eb;
+        font-size: 13px;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 14px 0 18px;
+        font-size: clamp(42px, 7vw, 84px);
+        line-height: 0.95;
+        letter-spacing: 0;
+      }
+
+      .lede {
+        max-width: 680px;
+        color: #475569;
+        font-size: clamp(18px, 2vw, 22px);
+      }
+
+      .actions,
+      .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .button {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        border-radius: 8px;
+        padding: 0 16px;
+        background: #111827;
+        color: #fff;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .button.secondary {
+        border: 1px solid #dbe3ef;
+        background: #fff;
+        color: #111827;
+      }
+
+      .stat,
+      .panel,
+      .card {
+        border: 1px solid #dbe3ef;
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .stat {
+        min-width: 132px;
+        padding: 14px;
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 24px;
+      }
+
+      .stat span {
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 750;
+      }
+
+      .panel {
+        min-width: 0;
+        overflow: hidden;
+        box-shadow: 0 24px 70px rgb(17 24 39 / 0.08);
+      }
+
+      .panel img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .caption {
+        border-top: 1px solid #e2e8f0;
+        padding: 14px 16px;
+        color: #475569;
+        font-size: 14px;
+      }
+
+      section {
+        padding: 70px 0;
+        border-top: 1px solid #dbe3ef;
+      }
+
+      h2 {
+        margin: 0 0 18px;
+        font-size: clamp(30px, 4vw, 54px);
+        line-height: 1;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .card {
+        min-width: 0;
+        padding: 20px;
+      }
+
+      .card h3 {
+        margin: 0 0 10px;
+      }
+
+      .card p,
+      .card code {
+        color: #475569;
+      }
+
+      .card code {
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+
+      footer {
+        padding: 34px 0;
+        color: #64748b;
+        font-size: 14px;
+      }
+
+      @media (max-width: 900px) {
+        header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        nav {
+          justify-content: flex-start;
+        }
+
+        .hero,
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          min-height: auto;
+          padding-top: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="shell">
+      <a class="brand" href="https://github.com/lidge-jun/markdown-fastrag-mcp">
+        <span class="mark">MD</span>
+        <span>Markdown FastRAG MCP</span>
+      </a>
+      <nav aria-label="Primary">
+        <a href="#workflow">Workflow</a>
+        <a href="#providers">Providers</a>
+        <a href="#security">Security</a>
+        <a href="https://github.com/lidge-jun/markdown-fastrag-mcp">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="shell hero">
+        <div>
+          <div class="eyebrow">Python MCP semantic search</div>
+          <h1>Search markdown by meaning, not exact words.</h1>
+          <p class="lede">
+            Markdown FastRAG MCP indexes markdown workspaces in the background, embeds chunks with the provider you choose,
+            and stores vectors in Milvus Lite, Milvus Standalone, or Zilliz Cloud.
+          </p>
+          <div class="actions" aria-label="Primary links">
+            <a class="button" href="https://github.com/lidge-jun/markdown-fastrag-mcp">Open repository</a>
+            <a class="button secondary" href="https://pypi.org/project/markdown-fastrag-mcp/">Open PyPI</a>
+          </div>
+          <div class="stats" aria-label="Project signals">
+            <div class="stat"><strong>1.7.1</strong><span>package version</span></div>
+            <div class="stat"><strong>6</strong><span>provider modes</span></div>
+            <div class="stat"><strong>Milvus</strong><span>vector store</span></div>
+          </div>
+        </div>
+
+        <aside class="panel" aria-label="Search screenshot">
+          <img src="./mcp_search.png" alt="MCP semantic search result screenshot" />
+          <div class="caption">Real repository screenshot of MCP semantic search output.</div>
+        </aside>
+      </div>
+
+      <section id="workflow">
+        <div class="shell">
+          <h2>The indexing loop is built for agent concurrency.</h2>
+          <div class="grid">
+            <article class="card">
+              <h3>Background jobs</h3>
+              <p><code>index_documents</code> returns a job id immediately, then <code>get_index_status</code> tracks progress.</p>
+            </article>
+            <article class="card">
+              <h3>Fast delta scan</h3>
+              <p>mtime and size skip unchanged files, while deleted files are pruned from the vector store.</p>
+            </article>
+            <article class="card">
+              <h3>Scoped search</h3>
+              <p><code>scope_path</code> keeps multi-agent searches constrained to the intended workspace area.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="providers">
+        <div class="shell">
+          <h2>Provider and storage choices stay explicit.</h2>
+          <div class="grid">
+            <article class="card">
+              <h3>Embeddings</h3>
+              <p>Local, Gemini, OpenAI, OpenAI-compatible, Vertex AI, and Voyage provider modes are configured by env vars.</p>
+            </article>
+            <article class="card">
+              <h3>Storage</h3>
+              <p>Milvus Lite is the local default. Set <code>MILVUS_ADDRESS</code> for Standalone or Zilliz Cloud.</p>
+            </article>
+            <article class="card">
+              <h3>Package</h3>
+              <p>Install from PyPI with <code>pip install markdown-fastrag-mcp</code> or run through an MCP host with <code>uvx</code>.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="security">
+        <div class="shell">
+          <h2>Workspace data should be treated as private.</h2>
+          <div class="grid">
+            <article class="card">
+              <h3>Secrets</h3>
+              <p>Provider keys are environment variables. Do not publish host configs with literal API keys.</p>
+            </article>
+            <article class="card">
+              <h3>Paths</h3>
+              <p>Vector stores and tracking data can reveal local file paths and note topics.</p>
+            </article>
+            <article class="card">
+              <h3>Verification</h3>
+              <p>Current local gate: <code>python3 -m py_compile server.py utils.py reindex.py chunking.py</code>.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell">
+      Apache-2.0 fork of MCP-Markdown-RAG. GitHub Pages is prepared from /docs after an authorized push.
+    </footer>
+  </body>
+</html>
